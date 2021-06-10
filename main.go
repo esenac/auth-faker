@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	key := LoadRSAPrivateKeyFromDisk("keys/private")
+	key := LoadRSAPrivateKeyFromDisk("/keys/private")
 
 	claims := jwt.StandardClaims{}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -19,7 +19,7 @@ func main() {
 		panic(e.Error())
 	}
 
-	publicKey := LoadRSAPublicKeyFromDisk("keys/public")
+	publicKey := LoadRSAPublicKeyFromDisk("/keys/public")
 	k, e := jwk.New(publicKey)
 
 	if e != nil {
