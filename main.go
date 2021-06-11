@@ -28,7 +28,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/get-token", GetHandler(map[string]string{"token": s}))
-	mux.HandleFunc("/jwks", GetHandler(k))
+	mux.HandleFunc("/.well-known/jwks.json", GetHandler(k))
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
