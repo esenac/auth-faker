@@ -8,6 +8,6 @@ RUN go build
 RUN chmod +x auth-faker
 
 FROM scratch
-COPY --from=builder /app/keys /keys
-COPY --from=builder /app/auth-faker /bin/auth-faker
-ENTRYPOINT [ "/bin/auth-faker" ]
+ADD resources /resources
+COPY --from=builder /app/auth-faker /auth-faker
+ENTRYPOINT [ "/auth-faker" ]

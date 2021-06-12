@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	key := LoadRSAPrivateKeyFromDisk("/keys/private")
+	key := LoadRSAPrivateKeyFromDisk("./resources/jwt-keys/private")
 
 	claims := jwt.StandardClaims{}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -19,7 +19,7 @@ func main() {
 		panic(e.Error())
 	}
 
-	publicKey := LoadRSAPublicKeyFromDisk("/keys/public")
+	publicKey := LoadRSAPublicKeyFromDisk("./resources/jwt-keys/public")
 	k, e := jwk.New(publicKey)
 
 	if e != nil {
@@ -30,5 +30,5 @@ func main() {
 	mux.HandleFunc("/get-token", GetHandler(map[string]string{"token": s}))
 	mux.HandleFunc("/jwks", GetHandler(k))
 
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	log.Fatal(http.ListenAndServeTLS(":8080", "./resources/certs/auth-faker+3.pem", "./resources/certs/auth-faker+3-key.pem", mux))
 }
