@@ -4,21 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/lestrrat-go/jwx/jwk"
 )
 
 func main() {
-	key := LoadRSAPrivateKeyFromDisk("./resources/jwt-keys/private")
-
-	claims := jwt.StandardClaims{}
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	s, e := token.SignedString(key)
-
-	if e != nil {
-		panic(e.Error())
-	}
-
 	publicKey := LoadRSAPublicKeyFromDisk("./resources/jwt-keys/public")
 	k, e := jwk.New(publicKey)
 
@@ -27,8 +16,9 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/get-token", GetHandler(map[string]string{"token": s}))
-	mux.HandleFunc("/jwks", GetHandler(k))
+
+	mux.HandleFunc("/token", GetTokenHandler())
+	mux.HandleFunc("/.well-known/jwks.json", GetHandler(k))
 
 	log.Fatal(http.ListenAndServeTLS(":8080", "./resources/certs/auth-faker+3.pem", "./resources/certs/auth-faker+3-key.pem", mux))
 }
