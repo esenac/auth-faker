@@ -38,7 +38,7 @@ func GetTokenHandler() func(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+		token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)
 		s, e := token.SignedString(key)
 
 		if e != nil {
