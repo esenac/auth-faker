@@ -1,4 +1,4 @@
-Generated with mkcert https://github.com/FiloSottile/mkcert
+Generated with mkcert
 
 mkcert -install
 mkcert auth-faker localhost 127.0.0.1 ::1

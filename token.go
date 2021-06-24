@@ -5,13 +5,19 @@ import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
+	"os"
 	"time"
 )
 
 var key *rsa.PrivateKey
+var issuer string
 
 func init() {
-	key = LoadRSAPrivateKeyFromDisk("./resources/jwt-keys/private")
+	key = LoadRSAPrivateKeyFromDisk("./resources/certs/certificate.key.pem")
+	issuer = os.Getenv("TOKEN_ISSUER")
+	if issuer == "" {
+		issuer = "auth-faker"
+	}
 }
 
 func GetTokenHandler() func(w http.ResponseWriter, r *http.Request) {
@@ -30,15 +36,16 @@ func GetTokenHandler() func(w http.ResponseWriter, r *http.Request) {
 			tokenRequest.TenantId,
 			tokenRequest.Email,
 			time.Now().Unix(),
+			"onboarding:read onboarding:write",
 			jwt.StandardClaims{
 				Subject:   tokenRequest.Subject,
-				Issuer:    "auth-faker",
+				Issuer:    issuer,
 				Audience:  tokenRequest.Audience,
 				ExpiresAt: time.Now().AddDate(1, 0, 0).Unix(),
 			},
 		}
 
-		token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)
+		token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 		s, e := token.SignedString(key)
 
 		if e != nil {
