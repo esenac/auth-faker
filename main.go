@@ -1,34 +1,47 @@
 package main
 
 import (
+	"github.com/lestrrat-go/jwx/jwk"
 	"log"
 	"net/http"
-
-	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/lestrrat-go/jwx/jwk"
+	"strings"
 )
 
+
+type JWKSResult struct {
+	Keys [1]jwk.Key `json:"keys"`
+}
+
 func main() {
-	key := LoadRSAPrivateKeyFromDisk("/keys/private")
-
-	claims := jwt.StandardClaims{}
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	s, e := token.SignedString(key)
+	location := "./resources/certs/certificate.pem"
+	publicKey := LoadRSAPublicKeyFromDisk(location)
+	x5cBytes, e := ReadKeyAsX5C(location)
+	x5c := strings.Replace(strings.Replace(string(x5cBytes), "-----BEGIN CERTIFICATE-----\n", "", -1),
+		"\n-----END CERTIFICATE-----", "", -1)
 
 	if e != nil {
 		panic(e.Error())
 	}
 
-	publicKey := LoadRSAPublicKeyFromDisk("/keys/public")
 	k, e := jwk.New(publicKey)
-
 	if e != nil {
 		panic(e.Error())
 	}
+	err := k.Set("x5c", x5c)
+	if err != nil {
+		panic(e.Error())
+	}
 
+	var keys [1]jwk.Key
+	keys[0] = k
+	result := JWKSResult{
+		Keys: keys,
+	}
 	mux := http.NewServeMux()
-	mux.HandleFunc("/get-token", GetHandler(map[string]string{"token": s}))
-	mux.HandleFunc("/.well-known/jwks.json", GetHandler(k))
 
-	log.Fatal(http.ListenAndServe(":8080", mux))
+
+	mux.HandleFunc("/token", GetTokenHandler())
+	mux.HandleFunc("/.well-known/jwks.json", GetHandler(result))
+
+	log.Fatal(http.ListenAndServe(":80", mux))
 }
