@@ -39,6 +39,7 @@ func main() {
 	}
 	mux := http.NewServeMux()
 
+
 	mux.HandleFunc("/token", GetTokenHandler())
 	mux.HandleFunc("/.well-known/jwks.json", GetHandler(result))
 
