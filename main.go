@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"strings"
 
+	"github.com/esenac/auth-faker/transport/http"
 	"github.com/lestrrat-go/jwx/jwk"
 )
 
@@ -30,10 +30,9 @@ func main() {
 
 	keyset := jwk.NewSet()
 	keyset.Add(k)
-	mux := http.NewServeMux()
 
-	mux.HandleFunc("/token", CreateTokenHandler())
-	mux.HandleFunc("/.well-known/jwks.json", GetHandler(keyset))
-
-	log.Fatal(http.ListenAndServe(":80", mux))
+	server := http.New()
+	server.AddRoute("/token", http.CreateTokenHandler(key, issuer))
+	server.AddRoute("/.well-known/jwks.json", http.GetHandler(keyset))
+	log.Fatal(server.Start(80))
 }

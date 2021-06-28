@@ -1,9 +1,10 @@
-package main
+package jwt
 
 import (
 	"encoding/json"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -11,6 +12,21 @@ import (
 type Claims struct {
 	jwt.StandardClaims
 	jwt.MapClaims
+}
+
+func New(subject, issuer, audience string, customClaims map[string]interface{}) Claims {
+	claims := Claims{}
+	claims.StandardClaims =
+		jwt.StandardClaims{
+			Subject:   subject,
+			Issuer:    issuer,
+			Audience:  audience,
+			ExpiresAt: time.Now().AddDate(1, 0, 0).Unix(),
+		}
+	for k, v := range customClaims {
+		claims.Add(k, v)
+	}
+	return claims
 }
 
 func (c Claims) Valid() error {

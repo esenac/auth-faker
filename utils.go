@@ -3,9 +3,21 @@ package main
 import (
 	"crypto/rsa"
 	"io/ioutil"
+	"os"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
+
+var key *rsa.PrivateKey
+var issuer string
+
+func init() {
+	key = LoadRSAPrivateKeyFromDisk("./resources/certs/certificate.key.pem")
+	issuer = os.Getenv("TOKEN_ISSUER")
+	if issuer == "" {
+		issuer = "auth-faker"
+	}
+}
 
 func LoadRSAPrivateKeyFromDisk(location string) *rsa.PrivateKey {
 	keyData, e := ioutil.ReadFile(location)
