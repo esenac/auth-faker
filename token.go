@@ -3,10 +3,11 @@ package main
 import (
 	"crypto/rsa"
 	"encoding/json"
-	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 var key *rsa.PrivateKey
@@ -20,34 +21,26 @@ func init() {
 	}
 }
 
-func GetTokenHandler() func(w http.ResponseWriter, r *http.Request) {
+func CreateTokenHandler() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenRequest, err := GetTokenRequest(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		claims := CloudAcademyClaims{
-			tokenRequest.Username,
-			tokenRequest.AccountId,
-			tokenRequest.UserId,
-			tokenRequest.ExternalAccountId,
-			tokenRequest.ExternalUserId,
-			tokenRequest.TenantId,
-			tokenRequest.Email,
-			time.Now().Unix(),
-			"onboarding:read onboarding:write",
+		claims := Claims{}
+		claims.StandardClaims =
 			jwt.StandardClaims{
 				Subject:   tokenRequest.Subject,
 				Issuer:    issuer,
 				Audience:  tokenRequest.Audience,
 				ExpiresAt: time.Now().AddDate(1, 0, 0).Unix(),
-			},
+			}
+		for k, v := range tokenRequest.CustomClaims {
+			claims.Add(k, v)
 		}
-
 		token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 		s, e := token.SignedString(key)
-
 		if e != nil {
 			panic(e.Error())
 		}

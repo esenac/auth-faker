@@ -6,15 +6,16 @@ import (
 )
 
 type TokenRequest struct {
-	Username          string `json:"username"`
-	Subject           string `json:"subject"`
-	Audience          string `json:"audience"`
-	AccountId         int    `json:"account_id"`
-	UserId            int    `json:"user_id"`
-	ExternalAccountId string `json:"external_account_id"`
-	ExternalUserId    string `json:"external_user_id"`
-	TenantId          string `json:"tenant_id"`
-	Email             string `json:"email"`
+	CustomClaims map[string]interface{} `json:"custom_claims"`
+	//Username          string `json:"username"`
+	Subject  string `json:"subject"`
+	Audience string `json:"audience"`
+	//AccountId         int    `json:"account_id"`
+	//UserId            int    `json:"user_id"`
+	//ExternalAccountId string `json:"external_account_id"`
+	//ExternalUserId    string `json:"external_user_id"`
+	//TenantId          string `json:"tenant_id"`
+	//Email             string `json:"email"`
 }
 
 func GetTokenRequest(r *http.Request) (TokenRequest, error) {

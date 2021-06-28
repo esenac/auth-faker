@@ -8,10 +8,6 @@ import (
 	"github.com/lestrrat-go/jwx/jwk"
 )
 
-type JWKSResult struct {
-	Keys [1]jwk.Key `json:"keys"`
-}
-
 func main() {
 	location := "./resources/certs/certificate.pem"
 	publicKey := LoadRSAPublicKeyFromDisk(location)
@@ -36,8 +32,7 @@ func main() {
 	keyset.Add(k)
 	mux := http.NewServeMux()
 
-
-	mux.HandleFunc("/token", GetTokenHandler())
+	mux.HandleFunc("/token", CreateTokenHandler())
 	mux.HandleFunc("/.well-known/jwks.json", GetHandler(keyset))
 
 	log.Fatal(http.ListenAndServe(":80", mux))
