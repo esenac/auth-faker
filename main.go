@@ -1,16 +1,12 @@
 package main
 
 import (
-	"github.com/lestrrat-go/jwx/jwk"
 	"log"
-	"net/http"
 	"strings"
+
+	"github.com/esenac/auth-faker/transport/http"
+	"github.com/lestrrat-go/jwx/jwk"
 )
-
-
-type JWKSResult struct {
-	Keys [1]jwk.Key `json:"keys"`
-}
 
 func main() {
 	location := "./resources/certs/certificate.pem"
@@ -32,16 +28,11 @@ func main() {
 		panic(e.Error())
 	}
 
-	var keys [1]jwk.Key
-	keys[0] = k
-	result := JWKSResult{
-		Keys: keys,
-	}
-	mux := http.NewServeMux()
+	keyset := jwk.NewSet()
+	keyset.Add(k)
 
-
-	mux.HandleFunc("/token", GetTokenHandler())
-	mux.HandleFunc("/.well-known/jwks.json", GetHandler(result))
-
-	log.Fatal(http.ListenAndServe(":80", mux))
+	server := http.New()
+	server.AddRoute("/token", http.CreateTokenHandler(key, issuer))
+	server.AddRoute("/.well-known/jwks.json", http.GetHandler(keyset))
+	log.Fatal(server.Start(80))
 }
