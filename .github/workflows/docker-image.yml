@@ -20,8 +20,8 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build the Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: esenac/auth-faker:latest
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: esenac/auth-faker:latest
