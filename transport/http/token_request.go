@@ -9,6 +9,7 @@ type TokenRequest struct {
 	CustomClaims map[string]interface{} `json:"custom_claims"`
 	Subject      string                 `json:"subject"`
 	Audience     string                 `json:"audience"`
+	Scope        string                 `json:"scope"`
 }
 
 func GetTokenRequest(r *http.Request) (TokenRequest, error) {

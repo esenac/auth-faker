@@ -14,15 +14,19 @@ type Claims struct {
 	jwt.MapClaims
 }
 
-func New(subject, issuer, audience string, customClaims map[string]interface{}) Claims {
-	claims := Claims{}
-	claims.StandardClaims =
+func New(subject string, issuer string, audience string, scope string, customClaims map[string]interface{}) Claims {
+	claims := Claims{
 		jwt.StandardClaims{
 			Subject:   subject,
 			Issuer:    issuer,
 			Audience:  audience,
 			ExpiresAt: time.Now().AddDate(1, 0, 0).Unix(),
-		}
+		},
+		jwt.MapClaims{
+			"scope": scope,
+		},
+	}
+
 	for k, v := range customClaims {
 		claims.Add(k, v)
 	}
