@@ -10,6 +10,7 @@ type TokenRequest struct {
 	Subject      string                 `json:"subject"`
 	Audience     string                 `json:"audience"`
 	Scope        string                 `json:"scope"`
+	Issuer       string                 `json:"issuer"`
 }
 
 func GetTokenRequest(r *http.Request) (TokenRequest, error) {
