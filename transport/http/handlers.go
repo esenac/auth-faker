@@ -29,7 +29,12 @@ func CreateTokenHandler(key interface{}, issuer string) func(w http.ResponseWrit
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		claims := jwt.New(tokenRequest.Subject, issuer, tokenRequest.Audience, tokenRequest.CustomClaims)
+		claims := jwt.New(
+			tokenRequest.Subject,
+			issuer,
+			tokenRequest.Audience,
+			tokenRequest.Scope,
+			tokenRequest.CustomClaims)
 
 		token := jwtgo.NewWithClaims(jwtgo.SigningMethodRS256, claims)
 		s, e := token.SignedString(key)
