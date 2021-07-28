@@ -22,7 +22,7 @@ func GetHandler(data interface{}) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateTokenHandler(key interface{}, issuer string) func(w http.ResponseWriter, r *http.Request) {
+func CreateTokenHandler(key interface{}) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenRequest, err := GetTokenRequest(r)
 		if err != nil {
@@ -31,7 +31,7 @@ func CreateTokenHandler(key interface{}, issuer string) func(w http.ResponseWrit
 
 		claims := jwt.New(
 			tokenRequest.Subject,
-			issuer,
+			tokenRequest.Issuer,
 			tokenRequest.Audience,
 			tokenRequest.Scope,
 			tokenRequest.CustomClaims)

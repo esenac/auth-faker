@@ -32,7 +32,7 @@ func main() {
 	keyset.Add(k)
 
 	server := http.New()
-	server.AddRoute("/token", http.CreateTokenHandler(key, issuer))
+	server.AddRoute("/token", http.CreateTokenHandler(key))
 	server.AddRoute("/.well-known/jwks.json", http.GetHandler(keyset))
 	log.Fatal(server.Start(80))
 }
