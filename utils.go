@@ -27,6 +27,9 @@ func LoadRSAPrivateKeyFromDisk(location string) *rsa.PrivateKey {
 
 func LoadRSAPublicKeyFromDisk(location string) *rsa.PublicKey {
 	keyData, e := ReadFile(location)
+	if e != nil {
+		panic(e.Error())
+	}
 	key, e := jwt.ParseRSAPublicKeyFromPEM(keyData)
 	if e != nil {
 		panic(e.Error())
