@@ -18,7 +18,7 @@ func GetHandler(data interface{}) func(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error converting results to json",
 				http.StatusInternalServerError)
 		}
-		w.Write(jsonBody)
+		_, _ = w.Write(jsonBody)
 	}
 }
 

@@ -2,8 +2,9 @@ package main
 
 import (
 	"crypto/rsa"
-	jwt "github.com/dgrijalva/jwt-go"
 	"io/ioutil"
+
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 var key *rsa.PrivateKey
@@ -26,6 +27,9 @@ func LoadRSAPrivateKeyFromDisk(location string) *rsa.PrivateKey {
 
 func LoadRSAPublicKeyFromDisk(location string) *rsa.PublicKey {
 	keyData, e := ReadFile(location)
+	if e != nil {
+		panic(e.Error())
+	}
 	key, e := jwt.ParseRSAPublicKeyFromPEM(keyData)
 	if e != nil {
 		panic(e.Error())
