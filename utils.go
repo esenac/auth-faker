@@ -7,44 +7,22 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-var key *rsa.PrivateKey
-
-func init() {
-	key = LoadRSAPrivateKeyFromDisk("./resources/certs/certificate.key.pem")
+func LoadRSAPrivateKeyFromDisk(location string) (*rsa.PrivateKey, error) {
+	keyData, err := ioutil.ReadFile(location)
+	if err != nil {
+		return nil, err
+	}
+	return jwt.ParseRSAPrivateKeyFromPEM(keyData)
 }
 
-func LoadRSAPrivateKeyFromDisk(location string) *rsa.PrivateKey {
-	keyData, e := ioutil.ReadFile(location)
-	if e != nil {
-		panic(e.Error())
+func LoadRSAPublicKeyFromDisk(location string) (*rsa.PublicKey, error) {
+	keyData, err := ReadFile(location)
+	if err != nil {
+		return nil, err
 	}
-	key, e := jwt.ParseRSAPrivateKeyFromPEM(keyData)
-	if e != nil {
-		panic(e.Error())
-	}
-	return key
-}
-
-func LoadRSAPublicKeyFromDisk(location string) *rsa.PublicKey {
-	keyData, e := ReadFile(location)
-	if e != nil {
-		panic(e.Error())
-	}
-	key, e := jwt.ParseRSAPublicKeyFromPEM(keyData)
-	if e != nil {
-		panic(e.Error())
-	}
-	return key
+	return jwt.ParseRSAPublicKeyFromPEM(keyData)
 }
 
 func ReadFile(location string) ([]byte, error) {
-	keyData, e := ioutil.ReadFile(location)
-	if e != nil {
-		panic(e.Error())
-	}
-	return keyData, e
-}
-
-func ReadKeyAsX5C(location string) ([]byte, error) {
-	return ReadFile(location)
+	return ioutil.ReadFile(location)
 }

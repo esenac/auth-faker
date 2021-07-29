@@ -1,7 +1,12 @@
-name: Docker Image CI
+name: Golang CI Lint
 
 on:
+  push: 
+    branches:
+      - "!master"
   pull_request:
+    branches:
+      - master
 
 jobs:
 
