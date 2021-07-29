@@ -12,6 +12,9 @@ func main() {
 	location := "./resources/certs/certificate.pem"
 	publicKey := LoadRSAPublicKeyFromDisk(location)
 	x5cBytes, e := ReadKeyAsX5C(location)
+	if e != nil {
+		panic(e.Error())
+	}
 	x5c := strings.Replace(strings.Replace(string(x5cBytes), "-----BEGIN CERTIFICATE-----\n", "", -1),
 		"\n-----END CERTIFICATE-----", "", -1)
 

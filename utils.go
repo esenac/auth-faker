@@ -2,8 +2,9 @@ package main
 
 import (
 	"crypto/rsa"
-	jwt "github.com/dgrijalva/jwt-go"
 	"io/ioutil"
+
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 var key *rsa.PrivateKey
