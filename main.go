@@ -2,40 +2,42 @@ package main
 
 import (
 	"log"
+	"os"
 	"strings"
 
+	"github.com/esenac/auth-faker/jwk"
 	"github.com/esenac/auth-faker/transport/http"
-	"github.com/lestrrat-go/jwx/jwk"
 )
 
 func main() {
 	location := "./resources/certs/certificate.pem"
-	publicKey := LoadRSAPublicKeyFromDisk(location)
-	x5cBytes, e := ReadKeyAsX5C(location)
-	if e != nil {
-		panic(e.Error())
+	publicKey, err := LoadRSAPublicKeyFromDisk(location)
+	if err != nil {
+		log.Fatal(err.Error())
+		os.Exit(1)
+	}
+	certificateKey, err := LoadRSAPrivateKeyFromDisk("./resources/certs/certificate.key.pem")
+	if err != nil {
+		log.Fatal(err.Error())
+		os.Exit(1)
+	}
+
+	x5cBytes, err := ReadFile(location)
+	if err != nil {
+		log.Fatal(err.Error())
+		os.Exit(1)
 	}
 	x5c := strings.Replace(strings.Replace(string(x5cBytes), "-----BEGIN CERTIFICATE-----\n", "", -1),
 		"\n-----END CERTIFICATE-----", "", -1)
 
-	if e != nil {
-		panic(e.Error())
-	}
-
-	k, e := jwk.New(publicKey)
-	if e != nil {
-		panic(e.Error())
-	}
-	err := k.Set("x5c", x5c)
+	key, err := jwk.NewKey(publicKey, &x5c)
 	if err != nil {
-		panic(e.Error())
+		log.Fatal(err.Error())
+		os.Exit(1)
 	}
-
-	keyset := jwk.NewSet()
-	keyset.Add(k)
-
+	keyset := jwk.GetKeyset(key)
 	server := http.New()
-	server.AddRoute("/token", http.CreateTokenHandler(key))
+	server.AddRoute("/token", http.CreateTokenHandler(certificateKey))
 	server.AddRoute("/.well-known/jwks.json", http.GetHandler(keyset))
 	log.Fatal(server.Start(80))
 }
