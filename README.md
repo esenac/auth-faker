@@ -7,5 +7,5 @@ Currently the server can be run using Docker with the following commands:
 
 ```
 docker build . -t auth-faker
-docker run -p 8080:8080 docker.io/library/auth-faker
+docker run -p 8080:80 docker.io/library/auth-faker
 ```
