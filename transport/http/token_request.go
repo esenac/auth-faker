@@ -1,24 +1,10 @@
 package http
 
-import (
-	"encoding/json"
-	"net/http"
-)
-
+// TokenRequest represents a request for a new token
 type TokenRequest struct {
 	CustomClaims map[string]interface{} `json:"custom_claims"`
 	Subject      string                 `json:"subject"`
 	Audience     string                 `json:"audience"`
 	Scope        string                 `json:"scope"`
 	Issuer       string                 `json:"issuer"`
-}
-
-func GetTokenRequest(r *http.Request) (TokenRequest, error) {
-	var result TokenRequest
-	err := json.NewDecoder(r.Body).Decode(&result)
-	if err != nil {
-		return TokenRequest{}, err
-	}
-
-	return result, nil
 }

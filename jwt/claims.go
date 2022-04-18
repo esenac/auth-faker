@@ -14,7 +14,9 @@ type Claims struct {
 	jwt.MapClaims
 }
 
-func New(subject string, issuer string, audience string, scope string, customClaims map[string]interface{}) Claims {
+type CustomClaims jwt.MapClaims
+
+func newClaims(subject string, issuer string, audience string, scope string, customClaims CustomClaims) Claims {
 	claims := Claims{
 		jwt.StandardClaims{
 			Subject:   subject,
