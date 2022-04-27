@@ -10,28 +10,18 @@ import (
 )
 
 func main() {
-	keysManager := keys.NewManager("./resources/certs/certificate.pem", "./resources/certs/certificate.key.pem")
-	publicKey, err := keysManager.LoadPublicKey()
+	keysManager := keys.NewLoader("./resources/certs/certificate.pem", "./resources/certs/certificate.key.pem")
+	jwkService, err := jwk.NewService(keysManager)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	certificateKey, err := keysManager.LoadPrivateKey()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	x5c, err := keysManager.LoadX5C()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	key, err := jwk.NewKey(publicKey, x5c)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	keyset := jwk.GetKeyset(key)
 
-	jwtService := jwt.NewService(certificateKey)
+	jwtService, err := jwt.NewService(keysManager)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	server := http.New()
 	server.AddRoute("/token", http.CreateTokenHandler(jwtService))
-	server.AddRoute("/.well-known/jwks.json", http.GetHandler(keyset))
+	server.AddRoute("/.well-known/jwks.json", http.GetJWKSHandler(jwkService))
 	log.Fatal(server.Start(80))
 }

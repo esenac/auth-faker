@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/esenac/auth-faker/jwt"
+	"github.com/lestrrat-go/jwx/jwk"
 )
 
 const (
@@ -12,14 +13,23 @@ const (
 	jsonContentType   = "application/json"
 )
 
+// TokenGetter defines a set of methods to retrieve a token.
 type TokenGetter interface {
 	GetSignedToken(sub, iss, aud, scope string, customClaims jwt.CustomClaims) (string, error)
 }
 
-func GetHandler(data interface{}) http.HandlerFunc {
+// KeySetGetter defines a set of methods to retrieve a jwk.Set.
+type KeySetGetter interface {
+	GetKeySet() jwk.Set
+}
+
+// GetJWKSHandler handles the JWKS retrieval.
+func GetJWKSHandler(keySetGetter KeySetGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		set := keySetGetter.GetKeySet()
+
 		w.Header().Add(contentTypeHeader, jsonContentType)
-		jsonBody, err := json.Marshal(data)
+		jsonBody, err := json.Marshal(set)
 		if err != nil {
 			http.Error(w, "Error converting results to json",
 				http.StatusInternalServerError)
@@ -28,11 +38,13 @@ func GetHandler(data interface{}) http.HandlerFunc {
 	}
 }
 
+// CreateTokenHandler handles the creation of a token
 func CreateTokenHandler(tokenGetter TokenGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenRequest, err := decodeRequest[TokenRequest](r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 		signedString, err := tokenGetter.GetSignedToken(
 			tokenRequest.Subject,

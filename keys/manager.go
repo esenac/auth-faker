@@ -8,36 +8,42 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-type Manager struct {
+// Loader loads public and private keys from provided locations.
+type Loader struct {
 	publicKeyLocation  string
 	privateKeyLocation string
 }
 
-func NewManager(publicKeyLocation, privateKeyLocation string) *Manager {
-	return &Manager{
+// NewLoader creates a Loader to load the public and private keys
+// from the given publicKeyLocation and privateKeyLocation, respectively.
+func NewLoader(publicKeyLocation, privateKeyLocation string) *Loader {
+	return &Loader{
 		publicKeyLocation:  publicKeyLocation,
 		privateKeyLocation: privateKeyLocation,
 	}
 }
 
-func (m *Manager) LoadPublicKey() (*rsa.PublicKey, error) {
-	keyData, err := ioutil.ReadFile(m.publicKeyLocation)
+// LoadPublicKey retrieves the public key from the disk and returns a rsa.PublicKey
+func (l *Loader) LoadPublicKey() (*rsa.PublicKey, error) {
+	keyData, err := ioutil.ReadFile(l.publicKeyLocation)
 	if err != nil {
 		return nil, err
 	}
 	return jwt.ParseRSAPublicKeyFromPEM(keyData)
 }
 
-func (m *Manager) LoadPrivateKey() (*rsa.PrivateKey, error) {
-	keyData, err := ioutil.ReadFile(m.privateKeyLocation)
+// LoadPrivateKey retrieves the public key from the disk and returns a rsa.PrivateKey
+func (l *Loader) LoadPrivateKey() (*rsa.PrivateKey, error) {
+	keyData, err := ioutil.ReadFile(l.privateKeyLocation)
 	if err != nil {
 		return nil, err
 	}
 	return jwt.ParseRSAPrivateKeyFromPEM(keyData)
 }
 
-func (m *Manager) LoadX5C() (*string, error) {
-	x5cBytes, err := ioutil.ReadFile(m.publicKeyLocation)
+// LoadX5C generates the x5c parameter starting from the public key.
+func (l *Loader) LoadX5C() (*string, error) {
+	x5cBytes, err := ioutil.ReadFile(l.publicKeyLocation)
 	if err != nil {
 		return nil, err
 	}
