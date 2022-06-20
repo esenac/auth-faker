@@ -70,7 +70,5 @@ func TestCreateTokenHandler(t *testing.T) {
 				t.Fail()
 			}
 		})
-
 	}
-
 }
