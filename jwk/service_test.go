@@ -3,6 +3,7 @@ package jwk
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"errors"
 	"testing"
 
 	"github.com/lestrrat-go/jwx/jwk"
@@ -24,18 +25,32 @@ func (m mockPublicKeyLoader) LoadX5C() (*string, error) {
 }
 
 func TestCreateKey(t *testing.T) {
+	keyLoaderErr := errors.New("key loader err")
+	x5cErr := errors.New("x5c loader err")
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	tests := []struct {
 		testCase    string
 		keyLoader   PublicKeyLoader
-		expectedKey jwk.Key
+		expectKey   bool
 		expectedErr error
 	}{
 		{
 			testCase:    "The Public Key is successfully loaded",
 			keyLoader:   mockPublicKeyLoader{pubKey: &privateKey.PublicKey},
-			expectedKey: nil,
+			expectKey:   true,
 			expectedErr: nil,
+		},
+		{
+			testCase:    "Key loader returns error",
+			keyLoader:   mockPublicKeyLoader{errLoadPublicKey: keyLoaderErr},
+			expectKey:   false,
+			expectedErr: keyLoaderErr,
+		},
+		{
+			testCase:    "x5c loader returns error",
+			keyLoader:   mockPublicKeyLoader{pubKey: &privateKey.PublicKey, errLoadX5C: x5cErr},
+			expectKey:   false,
+			expectedErr: x5cErr,
 		},
 	}
 
@@ -46,8 +61,8 @@ func TestCreateKey(t *testing.T) {
 				t.Logf("Expected error: %v - received error: %v", tc.expectedErr, err)
 				t.Fail()
 			}
-			if key != tc.expectedKey {
-				t.Logf("Expected key: %v - received key: %v", tc.expectedKey, key)
+			if _, ok := key.(jwk.Key); tc.expectKey && !ok {
+				t.Logf("Expected key type: jwk.Key - received key: %v", key)
 				t.Fail()
 			}
 		})
