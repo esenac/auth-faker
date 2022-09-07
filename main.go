@@ -4,31 +4,24 @@ import (
 	"log"
 
 	"github.com/esenac/auth-faker/jwk"
+	"github.com/esenac/auth-faker/jwt"
 	"github.com/esenac/auth-faker/keys"
 	"github.com/esenac/auth-faker/transport/http"
 )
 
 func main() {
-	keysManager := keys.NewManager("./resources/certs/certificate.pem", "./resources/certs/certificate.key.pem")
-	publicKey, err := keysManager.LoadPublicKey()
+	keysManager := keys.NewLoader("./resources/certs/certificate.pem", "./resources/certs/certificate.key.pem")
+	jwkService, err := jwk.NewService(keysManager)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	certificateKey, err := keysManager.LoadPrivateKey()
+
+	jwtService, err := jwt.NewService(keysManager)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	x5c, err := keysManager.LoadX5C()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	key, err := jwk.NewKey(publicKey, x5c)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	keyset := jwk.GetKeyset(key)
 	server := http.New()
-	server.AddRoute("/token", http.CreateTokenHandler(certificateKey))
-	server.AddRoute("/.well-known/jwks.json", http.GetHandler(keyset))
+	server.AddRoute("/token", http.CreateTokenHandler(jwtService))
+	server.AddRoute("/.well-known/jwks.json", http.GetJWKSHandler(jwkService))
 	log.Fatal(server.Start(80))
 }

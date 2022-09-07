@@ -9,12 +9,16 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+// Claims represents the JWT claims.
 type Claims struct {
 	jwt.StandardClaims
 	jwt.MapClaims
 }
 
-func New(subject string, issuer string, audience string, scope string, customClaims map[string]interface{}) Claims {
+// CustomClaims represents a set of custom JWT claims different from the standard ones.
+type CustomClaims jwt.MapClaims
+
+func newClaims(subject string, issuer string, audience string, scope string, customClaims CustomClaims) Claims {
 	claims := Claims{
 		jwt.StandardClaims{
 			Subject:   subject,
@@ -33,10 +37,12 @@ func New(subject string, issuer string, audience string, scope string, customCla
 	return claims
 }
 
+// Valid validates time based claims "exp, iat, nbf". It's based on jwt.StandardClaims Valid() method.
 func (c Claims) Valid() error {
 	return c.StandardClaims.Valid()
 }
 
+// Add adds a claim to the JWT.
 func (c *Claims) Add(k string, v interface{}) {
 	if c.MapClaims == nil {
 		c.MapClaims = jwt.MapClaims{}
@@ -44,6 +50,7 @@ func (c *Claims) Add(k string, v interface{}) {
 	c.MapClaims[k] = v
 }
 
+// MarshalJSON returns the JSON encoding of c.
 func (c Claims) MarshalJSON() ([]byte, error) {
 	finalMap := make(map[string]interface{})
 	structType := reflect.TypeOf(c.StandardClaims)

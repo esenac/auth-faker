@@ -4,16 +4,32 @@ import (
 	"encoding/json"
 	"net/http"
 
-	jwtgo "github.com/dgrijalva/jwt-go"
 	"github.com/esenac/auth-faker/jwt"
+	"github.com/lestrrat-go/jwx/jwk"
 )
 
-const contentTypeHeader = "Content-Type"
+const (
+	contentTypeHeader = "Content-Type"
+	jsonContentType   = "application/json"
+)
 
-func GetHandler(data interface{}) func(w http.ResponseWriter, r *http.Request) {
+// TokenGetter defines a set of methods to retrieve a token.
+type TokenGetter interface {
+	GetSignedToken(sub, iss, aud, scope string, customClaims jwt.CustomClaims) (string, error)
+}
+
+// KeySetGetter defines a set of methods to retrieve a jwk.Set.
+type KeySetGetter interface {
+	GetKeySet() jwk.Set
+}
+
+// GetJWKSHandler handles the JWKS retrieval.
+func GetJWKSHandler(keySetGetter KeySetGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add(contentTypeHeader, "application/json")
-		jsonBody, err := json.Marshal(data)
+		set := keySetGetter.GetKeySet()
+
+		w.Header().Add(contentTypeHeader, jsonContentType)
+		jsonBody, err := json.Marshal(set)
 		if err != nil {
 			http.Error(w, "Error converting results to json",
 				http.StatusInternalServerError)
@@ -22,32 +38,36 @@ func GetHandler(data interface{}) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateTokenHandler(key interface{}) func(w http.ResponseWriter, r *http.Request) {
+// CreateTokenHandler handles the creation of a token
+func CreateTokenHandler(tokenGetter TokenGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tokenRequest, err := GetTokenRequest(r)
+		tokenRequest, err := decodeRequest[TokenRequest](r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
-
-		claims := jwt.New(
+		signedString, err := tokenGetter.GetSignedToken(
 			tokenRequest.Subject,
 			tokenRequest.Issuer,
 			tokenRequest.Audience,
 			tokenRequest.Scope,
 			tokenRequest.CustomClaims)
-
-		token := jwtgo.NewWithClaims(jwtgo.SigningMethodRS256, claims)
-		s, e := token.SignedString(key)
-		if e != nil {
-			panic(e.Error())
+		if err != nil {
+			panic(err.Error())
 		}
 
-		w.Header().Add("Content-Type", "application/json")
-		jsonBody, err := json.Marshal(map[string]string{"token": s})
+		w.Header().Add(contentTypeHeader, jsonContentType)
+		jsonBody, err := json.Marshal(map[string]string{"token": signedString})
 		if err != nil {
 			http.Error(w, "Error converting results to json",
 				http.StatusInternalServerError)
 		}
 		_, _ = w.Write(jsonBody)
 	}
+}
+
+func decodeRequest[T any](r *http.Request) (T, error) {
+	var result T
+	err := json.NewDecoder(r.Body).Decode(&result)
+	return result, err
 }
