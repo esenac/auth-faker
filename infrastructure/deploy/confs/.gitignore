@@ -1,0 +1,11 @@
+
+# BEGIN_CATE_GIT_IGNORE
+*
+!*/
+!*/*.tfvars.json
+!*/*.tfvars
+!*/*.custom.tf
+!.gitignore
+*/.terraform
+extravars.generated.cate.tfvars.json
+# END_CATE_GIT_IGNORE

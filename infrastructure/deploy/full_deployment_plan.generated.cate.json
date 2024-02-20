@@ -1,0 +1,48 @@
+{
+ "project": {
+  "name": "auth-faker",
+  "owner": "platform",
+  "scope": "platform",
+  "kind": "services",
+  "cost_allocation": "platform",
+  "pretty_name": "Auth faker for service tests"
+ },
+ "deployments": {
+  "cross": {
+   "cross": {
+    "crossenv": {
+     "template": {
+      "name": "crossenv",
+      "variables": {
+       "target_account_id": "ssm::::/providers/aws/organization/main/accounts/tools/account/id"
+      },
+      "terraform": {
+       "version": "1.7.3"
+      }
+     },
+     "from": {
+      "account": "tools",
+      "region": "us-west-2",
+      "network": ""
+     }
+    }
+   }
+  }
+ },
+ "plan": [
+  {
+   "name": "crossenv",
+   "steps": [
+    {
+     "id": 0,
+     "deployments": [
+      "cross.cross.crossenv"
+     ]
+    }
+   ]
+  }
+ ],
+ "cate": {
+  "generated_by_version": "1.27.0"
+ }
+}
