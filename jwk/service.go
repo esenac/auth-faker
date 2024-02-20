@@ -18,8 +18,8 @@ type Service struct {
 }
 
 // NewService creates a Service using the provided keyLoader to retrieve the public key.
-func NewService(keyLoader PublicKeyLoader) (*Service, error) {
-	key, err := createKey(keyLoader)
+func NewService(keyId string, keyLoader PublicKeyLoader) (*Service, error) {
+	key, err := createKey(keyId, keyLoader)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (s Service) GetKeySet() jwk.Set {
 	return newKeyset(s.key)
 }
 
-func createKey(keyLoader PublicKeyLoader) (jwk.Key, error) {
+func createKey(keyId string, keyLoader PublicKeyLoader) (jwk.Key, error) {
 	publicKey, err := keyLoader.LoadPublicKey()
 	if err != nil {
 		return nil, err
@@ -41,5 +41,5 @@ func createKey(keyLoader PublicKeyLoader) (jwk.Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewKey(publicKey, x5c)
+	return NewKey(keyId, publicKey, x5c)
 }

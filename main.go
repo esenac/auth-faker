@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/google/uuid"
 	"log"
 
 	"github.com/esenac/auth-faker/jwk"
@@ -10,13 +11,14 @@ import (
 )
 
 func main() {
+	keyId := uuid.NewString()
 	keysManager := keys.NewLoader("./resources/certs/certificate.pem", "./resources/certs/certificate.key.pem")
-	jwkService, err := jwk.NewService(keysManager)
+	jwkService, err := jwk.NewService(keyId, keysManager)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	jwtService, err := jwt.NewService(keysManager)
+	jwtService, err := jwt.NewService(keyId, keysManager)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

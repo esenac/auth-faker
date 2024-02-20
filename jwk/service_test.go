@@ -56,7 +56,7 @@ func TestCreateKey(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.testCase, func(t *testing.T) {
-			key, err := createKey(tc.keyLoader)
+			key, err := createKey("some-key-id", tc.keyLoader)
 			if err != tc.expectedErr {
 				t.Logf("Expected error: %v - received error: %v", tc.expectedErr, err)
 				t.Fail()

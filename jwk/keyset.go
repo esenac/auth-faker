@@ -15,7 +15,7 @@ func newKeyset(keys ...jwk.Key) jwk.Set {
 }
 
 // NewKey creates a JWK key from the given public key and x5c.
-func NewKey(publicKey *rsa.PublicKey, x5c *string) (jwk.Key, error) {
+func NewKey(keyId string, publicKey *rsa.PublicKey, x5c *string) (jwk.Key, error) {
 	k, err := jwk.New(publicKey)
 	if err != nil {
 		return nil, err
@@ -23,5 +23,7 @@ func NewKey(publicKey *rsa.PublicKey, x5c *string) (jwk.Key, error) {
 	if x5c != nil {
 		err = k.Set("x5c", *x5c)
 	}
+	err = k.Set("alg", "RS256")
+	err = k.Set("kid", keyId)
 	return k, err
 }
